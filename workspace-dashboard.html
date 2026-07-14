@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="品牌策略工作台">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1F1310">
+<title>品牌策略工作台</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi5ZOB54mM562W55Wl5bel5L2c5Y+wIiwic2hvcnRfbmFtZSI6IuWTgeeJjOW3peS9nOWPsCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMUYxMzEwIiwidGhlbWVfY29sb3IiOiIjMUYxMzEwIiwiaWNvbnMiOltdfQ==">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #1F1310;
+    --bg-secondary: #2A1A15;
+    --bg-card: #36221C;
+    --bg-card-hover: #402A22;
+    --border: #4D322B;
+    --border-light: #5E3D34;
+    --text-primary: #F5E8DC;
+    --text-secondary: #D4C0B3;
+    --text-muted: #A0887A;
+    --accent-gold: #FF7B7B;
+    --accent-gold-light: #FF9E9E;
+    --accent-gold-dim: rgba(255,123,123,0.18);
+    --accent-coral: #FF8C69;
+    --accent-teal: #6BB5A0;
+    --accent-violet: #D488A0;
+    --accent-rose: #E8869A;
+    --shadow-gold: 0 0 30px rgba(255,123,123,0.15);
+    --shadow-card: 0 4px 24px rgba(255,107,107,0.12);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --sidebar-width: 260px;
+    --mobile-nav-height: 64px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: 15px; }
+  
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image: 
+      radial-gradient(ellipse at 15% 50%, rgba(255,123,123,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 20%, rgba(212,136,160,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(255,140,105,0.06) 0%, transparent 50%);
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: var(--sidebar-width);
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    z-index: 100; transition: var(--transition);
+  }
+  .sidebar-brand { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-brand h1 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: #FF7B7B; letter-spacing: 0.5px; line-height: 1.3; }
+  .sidebar-brand .subtitle { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; }
+  .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+  .nav-section-title { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2.5px; padding: 16px 12px 8px; font-weight: 500; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: var(--transition);
+    color: var(--text-secondary); font-size: 0.88rem; font-weight: 400;
+    margin-bottom: 2px; position: relative; user-select: none;
+  }
+  .nav-item:hover { background: rgba(255,123,123,0.08); color: var(--text-primary); }
+  .nav-item.active { background: var(--accent-gold-dim); color: var(--accent-gold-light); }
+  .nav-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: var(--accent-gold); border-radius: 0 3px 3px 0; }
+  .nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+  .nav-badge { margin-left: auto; background: var(--accent-gold); color: #fff; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; min-width: 20px; text-align: center; }
+  .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); }
+  .sidebar-footer .datetime { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); }
+  .sidebar-footer .greeting { font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px; }
+
+  /* ===== MOBILE NAV ===== */
+  .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: var(--mobile-nav-height); background: var(--bg-secondary); border-top: 1px solid var(--border); z-index: 200; padding: 0 8px; }
+  .mobile-nav-inner { display: flex; height: 100%; max-width: 500px; margin: 0 auto; }
+  .mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.6rem; cursor: pointer; transition: var(--transition); gap: 2px; user-select: none; -webkit-tap-highlight-color: transparent; }
+  .mobile-nav-item.active { color: var(--accent-gold); }
+  .mobile-nav-item .m-icon { font-size: 1.2rem; }
+  .mobile-nav-item .m-badge { position: absolute; top: 6px; right: 30%; background: var(--accent-gold); color: #fff; font-size: 0.55rem; padding: 1px 5px; border-radius: 8px; font-weight: 700; }
+
+  /* ===== MAIN CONTENT ===== */
+  .main-content { margin-left: var(--sidebar-width); min-height: 100vh; padding: 32px 40px; position: relative; }
+
+  /* ===== PAGE HEADER ===== */
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+  .page-header h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--text-primary); }
+  .page-header h2 .dot { color: var(--accent-gold); }
+  .page-header p { color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px; font-weight: 300; }
+  .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .btn {
+    padding: 10px 20px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-secondary); font-size: 0.82rem; cursor: pointer;
+    transition: var(--transition); font-family: 'Noto Sans SC', sans-serif;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent-gold); color: var(--accent-gold-light); background: var(--accent-gold-dim); }
+  .btn-primary { background: linear-gradient(135deg, #FF7B7B, #FF9E7B); border-color: #FF7B7B; color: #fff; font-weight: 500; }
+  .btn-primary:hover { background: linear-gradient(135deg, #FF9E9E, #FF7B7B); color: #fff; box-shadow: 0 0 20px rgba(255,123,123,0.25); }
+  .btn-ai { background: linear-gradient(135deg, #FF9E9E, #FF7B7B); border-color: #FF9E9E; color: #fff; }
+  .btn-ai:hover { background: linear-gradient(135deg, #FFC2C2, #FF9E9E); color: #fff; }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: panelIn 0.4s ease; }
+  @keyframes panelIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 24px;
+    transition: var(--transition); position: relative; overflow: hidden;
+  }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent-gold-dim), transparent); opacity: 0; transition: var(--transition); }
+  .card:hover::before { opacity: 1; }
+  .card:hover { border-color: var(--border-light); box-shadow: var(--shadow-card); }
+  .card-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-weight: 500; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card-title .icon { font-size: 0.9rem; }
+
+  .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 22px 24px;
+    transition: var(--transition); position: relative; overflow: hidden;
+  }
+  .stat-card:hover { border-color: var(--border-light); transform: translateY(-2px); box-shadow: var(--shadow-card); }
+  .stat-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; margin: 6px 0; color: var(--text-primary); }
+  .stat-change { font-size: 0.72rem; color: var(--accent-teal); font-weight: 500; }
+  .stat-change.down { color: var(--accent-coral); }
+  .stat-card .stat-icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 2.5rem; opacity: 0.08; color: var(--accent-gold); }
+
+  .two-col { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+
+  .todo-input-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .todo-input-row input, .note-input-area textarea {
+    flex: 1; padding: 10px 14px; background: var(--bg-secondary);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text-primary); font-family: 'Noto Sans SC', sans-serif;
+    font-size: 0.85rem; transition: var(--transition); outline: none;
+  }
+  .todo-input-row input:focus, .note-input-area textarea:focus { border-color: var(--accent-gold); box-shadow: 0 0 0 3px var(--accent-gold-dim); }
+  .todo-input-row input::placeholder, .note-input-area textarea::placeholder { color: var(--text-muted); }
+
+  .todo-filters { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
+  .todo-filter { padding: 5px 12px; border-radius: 20px; font-size: 0.72rem; cursor: pointer; color: var(--text-muted); border: 1px solid transparent; background: transparent; transition: var(--transition); font-family: 'Noto Sans SC', sans-serif; }
+  .todo-filter:hover { color: var(--text-secondary); }
+  .todo-filter.active { background: var(--accent-gold-dim); color: var(--accent-gold); border-color: rgba(255,123,123,0.2); }
+
+  .todo-list { list-style: none; max-height: 420px; overflow-y: auto; }
+  .todo-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,212,199,0.12); transition: var(--transition); }
+  .todo-item:hover { background: rgba(255,123,123,0.06); margin: 0 -8px; padding: 12px 8px; border-radius: var(--radius-sm); }
+  .todo-item:last-child { border-bottom: none; }
+  .todo-checkbox { width: 18px; height: 18px; border: 2px solid var(--border-light); border-radius: 4px; cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+  .todo-checkbox:hover { border-color: var(--accent-gold); }
+  .todo-checkbox.checked { background: var(--accent-gold); border-color: var(--accent-gold); }
+  .todo-checkbox.checked::after { content: '✓'; font-size: 11px; color: #fff; font-weight: 700; }
+  .todo-content { flex: 1; }
+  .todo-text { font-size: 0.85rem; color: var(--text-primary); line-height: 1.5; }
+  .todo-text.done { text-decoration: line-through; color: var(--text-muted); }
+  .todo-meta { display: flex; gap: 8px; margin-top: 4px; align-items: center; flex-wrap: wrap; }
+  .todo-tag { font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .tag-brand { background: rgba(255,123,123,0.12); color: var(--accent-gold); }
+  .tag-promo { background: rgba(255,140,105,0.12); color: var(--accent-coral); }
+  .tag-kol { background: rgba(212,136,160,0.12); color: var(--accent-violet); }
+  .tag-content { background: rgba(107,181,160,0.12); color: var(--accent-teal); }
+  .todo-date { font-size: 0.65rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+  .todo-actions { display: flex; gap: 4px; opacity: 0; transition: var(--transition); }
+  .todo-item:hover .todo-actions { opacity: 1; }
+  .todo-action-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; color: var(--text-muted); transition: var(--transition); font-size: 0.75rem; background: transparent; border: none; }
+  .todo-action-btn:hover { background: rgba(224,122,95,0.15); color: var(--accent-coral); }
+
+  .nav-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .nav-item-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); text-decoration: none; color: var(--text-primary); }
+  .nav-item-card:hover { border-color: var(--accent-gold); transform: translateY(-1px); box-shadow: var(--shadow-gold); }
+  .nav-item-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .nav-item-info h4 { font-size: 0.82rem; font-weight: 500; }
+  .nav-item-info p { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
+
+  .note-input-area { margin-bottom: 16px; }
+  .note-input-area textarea { width: 100%; min-height: 80px; resize: vertical; }
+  .note-input-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
+  .note-category-select { padding: 6px 12px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 0.78rem; font-family: 'Noto Sans SC', sans-serif; outline: none; cursor: pointer; }
+  .note-category-select:focus { border-color: var(--accent-gold); }
+  .notes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .note-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px; transition: var(--transition); position: relative; }
+  .note-card:hover { border-color: var(--border-light); transform: translateY(-2px); box-shadow: var(--shadow-card); }
+  .note-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .note-card-tag { font-size: 0.62rem; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .note-card-body { font-size: 0.82rem; color: var(--text-primary); line-height: 1.7; white-space: pre-wrap; }
+  .note-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .note-card-date { font-size: 0.65rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+  .note-card-delete { font-size: 0.7rem; color: var(--text-muted); cursor: pointer; transition: var(--transition); background: none; border: none; font-family: 'Noto Sans SC', sans-serif; }
+  .note-card-delete:hover { color: var(--accent-coral); }
+
+  .strategy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .strategy-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; transition: var(--transition); cursor: pointer; }
+  .strategy-card:hover { border-color: var(--border-light); transform: translateY(-3px); box-shadow: var(--shadow-card); }
+  .strategy-card-icon { width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px; }
+  .strategy-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+  .strategy-card p { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6; }
+  .strategy-card .status-bar { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .strategy-card .status-item { display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 6px; }
+  .strategy-card .status-item .label { color: var(--text-muted); }
+  .strategy-card .status-item .value { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+  .progress-bar { width: 100%; height: 4px; background: var(--bg-secondary); border-radius: 2px; overflow: hidden; margin-top: 8px; }
+  .progress-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; padding: 16px 0 24px; }
+  .timeline-item::before { content: ''; position: absolute; left: -24px; top: 22px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--accent-gold); background: var(--bg-primary); }
+  .timeline-item.active::before { background: var(--accent-gold); }
+  .timeline-date { font-size: 0.68rem; color: var(--accent-gold); font-family: 'JetBrains Mono', monospace; font-weight: 500; letter-spacing: 0.5px; }
+  .timeline-title { font-size: 0.92rem; font-weight: 500; margin: 4px 0 6px; }
+  .timeline-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6; }
+  .timeline-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(61,44,44,0.35); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); width: 90%; max-width: 540px; padding: 32px; animation: modalIn 0.3s ease; max-height: 90vh; overflow-y: auto; }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  .modal h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 20px; color: var(--text-primary); }
+  .modal-field { margin-bottom: 14px; }
+  .modal-field label { display: block; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
+  .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 10px 14px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: 'Noto Sans SC', sans-serif; font-size: 0.85rem; outline: none; transition: var(--transition); }
+  .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { border-color: var(--accent-gold); box-shadow: 0 0 0 3px var(--accent-gold-dim); }
+  .modal-field textarea { min-height: 60px; resize: vertical; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+  .toast { padding: 12px 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.82rem; color: var(--text-primary); box-shadow: var(--shadow-card); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards; display: flex; align-items: center; gap: 8px; }
+  .toast.success { border-left: 3px solid var(--accent-teal); }
+  .toast.error { border-left: 3px solid var(--accent-coral); }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(20px); } }
+
+  .pomodoro-display { text-align: center; padding: 30px; }
+  .pomodoro-time { font-family: 'JetBrains Mono', monospace; font-size: 4rem; font-weight: 700; color: var(--accent-gold); letter-spacing: 4px; text-shadow: 0 0 40px rgba(255,123,123,0.25); }
+  .pomodoro-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 8px; text-transform: uppercase; letter-spacing: 3px; }
+  .pomodoro-controls { display: flex; gap: 12px; justify-content: center; margin-top: 28px; }
+  .pomodoro-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
+
+  .grain-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.012; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3; }
+  .empty-state p { font-size: 0.85rem; }
+
+  /* ===== AI ASSISTANT PANEL ===== */
+  .ai-hero { text-align: center; padding: 40px 20px; }
+  .ai-hero .ai-icon { font-size: 3rem; margin-bottom: 16px; display: block; }
+  .ai-hero h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--text-primary); margin-bottom: 8px; }
+  .ai-hero p { color: var(--text-secondary); font-size: 0.85rem; max-width: 500px; margin: 0 auto; line-height: 1.7; }
+  .ai-prompts { margin-top: 32px; }
+  .ai-prompt-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 14px; transition: var(--transition); cursor: pointer; position: relative; }
+  .ai-prompt-card:hover { border-color: #FF9E9E; box-shadow: 0 0 20px rgba(255,158,158,0.12); }
+  .ai-prompt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .ai-prompt-title { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); }
+  .ai-prompt-tag { font-size: 0.6rem; padding: 3px 10px; border-radius: 10px; background: rgba(255,123,123,0.12); color: #FF7B7B; font-weight: 500; }
+  .ai-prompt-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; }
+  .ai-prompt-actions { display: flex; gap: 8px; }
+  .btn-copy { padding: 6px 14px; font-size: 0.72rem; background: rgba(255,123,123,0.1); border: 1px solid rgba(255,123,123,0.2); color: #FF7B7B; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); font-family: 'Noto Sans SC', sans-serif; }
+  .btn-copy:hover { background: rgba(255,123,123,0.18); }
+  .btn-copy.copied { background: #6BB5A0; color: #fff; border-color: #6BB5A0; }
+
+  .ai-context-bar { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .ai-context-bar .context-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
+  .ai-context-bar .context-value { font-size: 0.82rem; color: var(--accent-gold-light); font-weight: 500; }
+  .ai-context-bar .context-sep { color: var(--text-muted); margin: 0 4px; }
+
+  .ai-howto { margin-top: 32px; }
+  .ai-howto h4 { font-size: 0.85rem; color: var(--text-primary); margin-bottom: 14px; }
+  .ai-howto-step { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+  .ai-howto-step .step-num { width: 24px; height: 24px; border-radius: 50%; background: #FF7B7B; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+  .ai-howto-step .step-text { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6; padding-top: 2px; }
+  .ai-howto-step .step-text strong { color: var(--text-primary); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1200px) {
+    .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+    .strategy-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 900px) {
+    .sidebar { width: 70px; }
+    .sidebar-brand h1, .sidebar-brand .subtitle, .nav-item span, .nav-badge, .nav-section-title { display: none; }
+    .sidebar-brand { padding: 20px 10px; text-align: center; }
+    .sidebar-nav { padding: 12px 6px; }
+    .nav-item { justify-content: center; padding: 12px; }
+    .nav-item.active::before { display: none; }
+    .sidebar-footer { display: none; }
+    .main-content { margin-left: 70px; padding: 24px 20px; }
+    .two-col { grid-template-columns: 1fr; }
+    .notes-grid { grid-template-columns: 1fr; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .strategy-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+    .main-content { margin-left: 0; padding: 16px 12px; padding-bottom: calc(var(--mobile-nav-height) + 20px); }
+    .mobile-nav { display: block; }
+    .page-header h2 { font-size: 1.3rem; }
+    .nav-grid { grid-template-columns: 1fr; }
+    .pomodoro-time { font-size: 2.8rem; }
+    .pomodoro-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .modal { width: 94%; padding: 20px; }
+    .toast-container { top: auto; bottom: calc(var(--mobile-nav-height) + 10px); left: 10px; right: 10px; }
+    .todo-filters { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+    .todo-filters::-webkit-scrollbar { height: 0; }
+    .header-actions { width: 100%; }
+    .btn { font-size: 0.75rem; padding: 8px 14px; }
+    .ai-hero { padding: 20px 10px; }
+    .stat-value { font-size: 1.5rem; }
+    .stat-card { padding: 16px 18px; }
+    .workshop-dims { grid-template-columns: repeat(2, 1fr); }
+    .workshop-source-tabs { flex-direction: column; }
+  }
+
+  /* ===== CASE WORKSHOP ===== */
+  .workshop-input-group { margin-bottom: 18px; }
+  .workshop-label { display: block; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; font-weight: 500; }
+  .workshop-input { width: 100%; padding: 10px 14px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: 'Noto Sans SC', sans-serif; font-size: 0.85rem; outline: none; transition: var(--transition); }
+  .workshop-input:focus { border-color: var(--accent-gold); box-shadow: 0 0 0 3px var(--accent-gold-dim); }
+  .workshop-input::placeholder { color: var(--text-muted); }
+
+  .workshop-source-tabs { display: flex; gap: 10px; margin-bottom: 4px; }
+  .workshop-tab { padding: 8px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); font-size: 0.8rem; cursor: pointer; transition: var(--transition); font-family: 'Noto Sans SC', sans-serif; }
+  .workshop-tab:hover { border-color: var(--accent-gold); color: var(--accent-gold-light); }
+  .workshop-tab.active { background: var(--accent-gold-dim); border-color: rgba(255,123,123,0.3); color: var(--accent-gold); }
+
+  .workshop-dims { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .workshop-dim { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); font-size: 0.8rem; color: var(--text-secondary); }
+  .workshop-dim:hover { border-color: var(--accent-gold); }
+  .workshop-dim input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent-gold); cursor: pointer; }
+  .workshop-dim:has(input:checked) { border-color: var(--accent-gold); color: var(--accent-gold-light); background: var(--accent-gold-dim); }
+
+  .workshop-result-section { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .workshop-result-section:last-child { border-bottom: none; margin-bottom: 0; }
+  .workshop-result-title { font-size: 0.85rem; font-weight: 600; color: var(--accent-gold); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .workshop-result-body { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.8; }
+  .workshop-result-body ul { margin: 6px 0 6px 18px; padding: 0; }
+  .workshop-result-body li { margin-bottom: 4px; }
+
+  .workshop-history-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 14px; transition: var(--transition); }
+  .workshop-history-card:hover { border-color: var(--border-light); box-shadow: var(--shadow-card); }
+  .workshop-history-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .workshop-history-title { font-size: 0.92rem; font-weight: 600; color: var(--text-primary); }
+  .workshop-history-brand { font-size: 0.7rem; padding: 2px 10px; border-radius: 10px; background: rgba(255,123,123,0.12); color: var(--accent-gold); font-weight: 500; }
+  .workshop-history-preview { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 10px; }
+  .workshop-history-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; color: var(--text-muted); }
+  .workshop-history-actions { display: flex; gap: 8px; }
+  .workshop-history-actions button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.72rem; font-family: 'Noto Sans SC', sans-serif; transition: var(--transition); }
+  .workshop-history-actions button:hover { color: var(--accent-coral); }
+</style>
+</head>
+<body>
+
+<div class="grain-overlay"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Desktop Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <h1>Brand<br>Strategy<br>Studio</h1>
+    <div class="subtitle">Personal Workspace</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">概览</div>
+    <div class="nav-item active" data-panel="dashboard" onclick="switchPanel('dashboard', this)">
+      <span class="nav-icon">◈</span><span>工作台总览</span>
+    </div>
+    <div class="nav-section-title">核心模块</div>
+    <div class="nav-item" data-panel="todos" onclick="switchPanel('todos', this)">
+      <span class="nav-icon">▣</span><span>任务管理</span>
+      <span class="nav-badge" id="todoBadge">0</span>
+    </div>
+    <div class="nav-item" data-panel="notes" onclick="switchPanel('notes', this)">
+      <span class="nav-icon">✎</span><span>知识笔记</span>
+    </div>
+    <div class="nav-item" data-panel="navigation" onclick="switchPanel('navigation', this)">
+      <span class="nav-icon">⚡</span><span>快捷导航</span>
+    </div>
+    <div class="nav-section-title">营销策划</div>
+    <div class="nav-item" data-panel="strategy" onclick="switchPanel('strategy', this)">
+      <span class="nav-icon">◎</span><span>品牌策略</span>
+    </div>
+    <div class="nav-item" data-panel="promo" onclick="switchPanel('promo', this)">
+      <span class="nav-icon">◉</span><span>大促节点</span>
+    </div>
+    <div class="nav-item" data-panel="kol" onclick="switchPanel('kol', this)">
+      <span class="nav-icon">✦</span><span>KOL/KOC协作</span>
+    </div>
+    <div class="nav-section-title">案例工坊</div>
+    <div class="nav-item" data-panel="workshop" onclick="switchPanel('workshop', this)">
+      <span class="nav-icon">◐</span><span>案例拆解</span>
+    </div>
+    <div class="nav-section-title">AI 助手</div>
+    <div class="nav-item" data-panel="ai" onclick="switchPanel('ai', this)">
+      <span class="nav-icon">⚛</span><span>TRAE 助手</span>
+    </div>
+    <div class="nav-section-title">工具</div>
+    <div class="nav-item" data-panel="pomodoro" onclick="switchPanel('pomodoro', this)">
+      <span class="nav-icon">◷</span><span>专注计时</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="datetime" id="sidebarDateTime"></div>
+    <div class="greeting" id="sidebarGreeting"></div>
+  </div>
+</aside>
+
+<!-- Mobile Bottom Nav -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <div class="mobile-nav-item active" data-panel="dashboard" onclick="switchPanel('dashboard', this)">
+      <span class="m-icon">◈</span><span>总览</span>
+    </div>
+    <div class="mobile-nav-item" data-panel="todos" onclick="switchPanel('todos', this)">
+      <span class="m-icon">▣</span><span>任务</span>
+      <span class="m-badge" id="mobileTodoBadge" style="display:none">0</span>
+    </div>
+    <div class="mobile-nav-item" data-panel="ai" onclick="switchPanel('ai', this)">
+      <span class="m-icon">⚛</span><span>AI助手</span>
+    </div>
+    <div class="mobile-nav-item" data-panel="notes" onclick="switchPanel('notes', this)">
+      <span class="m-icon">✎</span><span>笔记</span>
+    </div>
+    <div class="mobile-nav-item" data-panel="promo" onclick="switchPanel('promo', this)">
+      <span class="m-icon">◉</span><span>节点</span>
+    </div>
+    <div class="mobile-nav-item" data-panel="workshop" onclick="switchPanel('workshop', this)">
+      <span class="m-icon">◐</span><span>拆解</span>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+  
+  <!-- ===== DASHBOARD ===== -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="page-header">
+      <div><h2>工作台总览<span class="dot">.</span></h2><p>品牌策略与营销策划中枢</p></div>
+      <div class="header-actions">
+        <button class="btn" onclick="exportData()">↓ 导出数据</button>
+        <button class="btn btn-primary" onclick="openQuickAdd()">+ 快速添加</button>
+      </div>
+    </div>
+    <div class="dashboard-grid">
+      <div class="stat-card"><div class="stat-label">待办任务</div><div class="stat-value" id="stat-todos">0</div><div class="stat-change">进行中</div><span class="stat-icon">▣</span></div>
+      <div class="stat-card"><div class="stat-label">知识笔记</div><div class="stat-value" id="stat-notes">0</div><div class="stat-change">已积累</div><span class="stat-icon">✎</span></div>
+      <div class="stat-card"><div class="stat-label">今日专注</div><div class="stat-value" id="stat-focus">0<span style="font-size:1rem;font-family:'Noto Sans SC';color:var(--text-muted)">min</span></div><div class="stat-change" id="stat-focus-change">继续保持</div><span class="stat-icon">◷</span></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-title"><span class="icon">◈</span> 近期任务</div><ul class="todo-list" id="dashTodoList"></ul><div class="empty-state" id="dashTodoEmpty" style="display:none"><div class="icon">▣</div><p>暂无待办任务</p></div></div>
+      <div class="card"><div class="card-title"><span class="icon">◉</span> 近期笔记</div><div id="dashNotesPreview" style="max-height:420px;overflow-y:auto;"></div><div class="empty-state" id="dashNoteEmpty" style="display:none"><div class="icon">✎</div><p>暂无笔记</p></div></div>
+    </div>
+  </div>
+
+  <!-- ===== TODOS ===== -->
+  <div class="panel" id="panel-todos">
+    <div class="page-header">
+      <div><h2>任务管理<span class="dot">.</span></h2><p>追踪品牌策略、大促节点、KOL/KOC合作事项</p></div>
+      <div class="header-actions"><button class="btn" onclick="clearCompletedTodos()">清除已完成</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">▣</span> 任务列表</div>
+      <div class="todo-input-row">
+        <input type="text" id="todoInput" placeholder="输入任务，按 Enter 添加..." onkeydown="if(event.key==='Enter')addTodo()">
+        <button class="btn btn-primary" onclick="addTodo()">添加</button>
+      </div>
+      <div class="todo-filters">
+        <button class="todo-filter active" data-filter="all" onclick="filterTodos('all', this)">全部</button>
+        <button class="todo-filter" data-filter="active" onclick="filterTodos('active', this)">进行中</button>
+        <button class="todo-filter" data-filter="done" onclick="filterTodos('done', this)">已完成</button>
+        <button class="todo-filter" data-filter="brand" onclick="filterTodos('brand', this)">品牌策略</button>
+        <button class="todo-filter" data-filter="promo" onclick="filterTodos('promo', this)">大促节点</button>
+        <button class="todo-filter" data-filter="kol" onclick="filterTodos('kol', this)">KOL/KOC</button>
+        <button class="todo-filter" data-filter="content" onclick="filterTodos('content', this)">内容产出</button>
+      </div>
+      <ul class="todo-list" id="todoList"></ul>
+      <div class="empty-state" id="todoEmpty" style="display:none"><div class="icon">▣</div><p>任务列表为空</p></div>
+    </div>
+  </div>
+
+  <!-- ===== NOTES ===== -->
+  <div class="panel" id="panel-notes">
+    <div class="page-header"><div><h2>知识笔记<span class="dot">.</span></h2><p>记录品牌洞察、策划灵感、合作资源</p></div></div>
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-title"><span class="icon">✎</span> 新建笔记</div>
+      <div class="note-input-area"><textarea id="noteContent" placeholder="记录你的想法、洞察、灵感..."></textarea></div>
+      <div class="note-input-actions">
+        <select class="note-category-select" id="noteCategory">
+          <option value="insight">品牌洞察</option><option value="idea">策划灵感</option><option value="resource">合作资源</option><option value="case">案例研究</option><option value="trend">趋势观察</option><option value="other">其他</option>
+        </select>
+        <button class="btn btn-primary" onclick="addNote()">保存笔记</button>
+      </div>
+    </div>
+    <div class="notes-grid" id="notesGrid"></div>
+    <div class="empty-state" id="notesEmpty" style="display:none"><div class="icon">✎</div><p>开始记录你的第一篇笔记</p></div>
+  </div>
+
+  <!-- ===== NAVIGATION ===== -->
+  <div class="panel" id="panel-navigation">
+    <div class="page-header"><div><h2>快捷导航<span class="dot">.</span></h2><p>常用工具与资源一站直达</p></div><div class="header-actions"><button class="btn" onclick="openAddNavModal()">+ 添加链接</button></div></div>
+    <div class="nav-grid" id="navGrid"></div>
+  </div>
+
+  <!-- ===== STRATEGY ===== -->
+  <div class="panel" id="panel-strategy">
+    <div class="page-header"><div><h2>品牌策略<span class="dot">.</span></h2><p>规划品牌定位、传播策略与增长路径</p></div></div>
+    <div class="strategy-grid" id="strategyGrid"></div>
+  </div>
+
+  <!-- ===== PROMO ===== -->
+  <div class="panel" id="panel-promo">
+    <div class="page-header"><div><h2>大促节点<span class="dot">.</span></h2><p>全年营销日历与活动规划</p></div></div>
+    <div class="card"><div class="card-title"><span class="icon">◉</span> 2026 营销节点</div><div class="timeline" id="promoTimeline"></div></div>
+  </div>
+
+  <!-- ===== KOL ===== -->
+  <div class="panel" id="panel-kol">
+    <div class="page-header"><div><h2>KOL/KOC 协作<span class="dot">.</span></h2><p>管理达人合作、艺人节点与内容分发</p></div></div>
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-title"><span class="icon">✦</span> 协作数据概览</div>
+      <div class="dashboard-grid" style="margin-bottom:0">
+        <div class="stat-card"><div class="stat-label">活跃合作</div><div class="stat-value">5</div><div class="stat-change">进行中</div><span class="stat-icon">◎</span></div>
+        <div class="stat-card"><div class="stat-label">本月产出</div><div class="stat-value">12</div><div class="stat-change down">+3 vs 上月</div><span class="stat-icon">◉</span></div>
+        <div class="stat-card"><div class="stat-label">待跟进</div><div class="stat-value">3</div><div class="stat-change">需处理</div><span class="stat-icon">◈</span></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title"><span class="icon">✦</span> 合作管理</div><div id="kolList"></div></div>
+  </div>
+
+  <!-- ===== CASE WORKSHOP ===== -->
+  <div class="panel" id="panel-workshop">
+    <div class="page-header">
+      <div><h2>案例拆解<span class="dot">.</span></h2><p>收藏优秀案例，拆解营销手法，萃取可复用经验</p></div>
+    </div>
+
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-title"><span class="icon">◐</span> 新建案例拆解</div>
+      <div class="workshop-input-group">
+        <label class="workshop-label">案例来源</label>
+        <div class="workshop-source-tabs">
+          <button class="workshop-tab active" data-tab="text" onclick="switchWorkshopTab('text', this)">📋 笔记/文案</button>
+          <button class="workshop-tab" data-tab="video" onclick="switchWorkshopTab('video', this)">🎬 视频链接</button>
+          <button class="workshop-tab" data-tab="article" onclick="switchWorkshopTab('article', this)">📄 文章链接</button>
+        </div>
+      </div>
+      <div class="workshop-input-group">
+        <label class="workshop-label">案例标题/名称</label>
+        <input type="text" id="workshopTitle" placeholder="例如：瑞幸 x 茅台「酱香拿铁」联名营销" class="workshop-input">
+      </div>
+      <div class="workshop-input-group">
+        <label class="workshop-label">品牌/产品</label>
+        <input type="text" id="workshopBrand" placeholder="例如：瑞幸咖啡" class="workshop-input">
+      </div>
+      <div class="workshop-input-group">
+        <label class="workshop-label">案例内容 / 链接</label>
+        <textarea id="workshopContent" placeholder="粘贴你收藏的笔记内容、文案、视频描述，或者文章链接..."></textarea>
+      </div>
+      <div class="workshop-input-group">
+        <label class="workshop-label">分析维度（可多选）</label>
+        <div class="workshop-dims">
+          <label class="workshop-dim"><input type="checkbox" value="positioning" checked><span>品牌定位</span></label>
+          <label class="workshop-dim"><input type="checkbox" value="creative" checked><span>创意策略</span></label>
+          <label class="workshop-dim"><input type="checkbox" value="content" checked><span>内容拆解</span></label>
+          <label class="workshop-dim"><input type="checkbox" value="channel"><span>渠道打法</span></label>
+          <label class="workshop-dim"><input type="checkbox" value="kol"><span>达人合作</span></label>
+          <label class="workshop-dim"><input type="checkbox" value="conversion" checked><span>转化路径</span></label>
+          <label class="workshop-dim"><input type="checkbox" value="data"><span>数据亮点</span></label>
+          <label class="workshop-dim"><input type="checkbox" value="insight"><span>核心洞察</span></label>
+        </div>
+      </div>
+      <div class="note-input-actions">
+        <select class="note-category-select" id="workshopCategory">
+          <option value="case">案例研究</option>
+          <option value="insight">品牌洞察</option>
+          <option value="trend">趋势观察</option>
+          <option value="other">其他</option>
+        </select>
+        <button class="btn btn-primary" onclick="analyzeCase()">✨ 开始拆解分析</button>
+      </div>
+    </div>
+
+    <div class="card" id="workshopResultCard" style="display:none;margin-bottom:24px">
+      <div class="card-title"><span class="icon">✎</span> 拆解分析结果</div>
+      <div id="workshopResult"></div>
+      <div class="note-input-actions" style="margin-top:16px">
+        <button class="btn" onclick="document.getElementById('workshopResultCard').style.display='none'">关闭</button>
+        <button class="btn btn-primary" onclick="saveWorkshopResult()">💾 保存到知识笔记</button>
+      </div>
+    </div>
+
+    <div id="workshopHistory"></div>
+  </div>
+
+  <!-- ===== AI ASSISTANT ===== -->
+  <div class="panel" id="panel-ai">
+    <div class="page-header"><div><h2>TRAE 助手<span class="dot">.</span></h2><p>你的品牌策略 AI 伙伴</p></div></div>
+    
+    <div class="ai-context-bar" id="aiContextBar">
+      <span class="context-label">当前上下文</span>
+      <span class="context-sep">|</span>
+      <span class="context-value" id="aiContextStats">待办 <span id="aiTodos">0</span> 项 · 笔记 <span id="aiNotes">0</span> 篇 · 策略 <span id="aiStrategies">6</span> 项</span>
+    </div>
+
+    <div class="ai-hero">
+      <span class="ai-icon">⚛</span>
+      <h3>你好，我是你的营销策略 AI 助手</h3>
+      <p>我可以帮你起草品牌Brief、规划营销方案、分析竞品策略、撰写合作提案。点击下方场景卡片，一键生成精准 Prompt，粘贴到 TRAE 对话中即可开始协作。</p>
+    </div>
+
+    <div class="ai-prompts" id="aiPrompts"></div>
+
+    <div class="ai-howto">
+      <h4>如何使用 TRAE 助手</h4>
+      <div class="ai-howto-step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>在工作台记录你的需求</strong> — 在任务和笔记中写下你正在处理的品牌策略问题</div>
+      </div>
+      <div class="ai-howto-step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>点击下方场景卡片</strong> — 选择与你当前工作最匹配的场景，一键复制精准 Prompt</div>
+      </div>
+      <div class="ai-howto-step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>粘贴到 TRAE 对话框</strong> — 打开 TRAE 应用，粘贴 Prompt，AI 将基于你的上下文给出专业建议</div>
+      </div>
+      <div class="ai-howto-step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>将产出保存回工作台</strong> — 把 TRAE 生成的方案、Brief、报告等保存到笔记或导出为文档</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== POMODORO ===== -->
+  <div class="panel" id="panel-pomodoro">
+    <div class="page-header"><div><h2>专注计时<span class="dot">.</span></h2><p>Pomodoro Technique — 保持高效专注</p></div></div>
+    <div class="card">
+      <div class="pomodoro-display">
+        <div class="pomodoro-time" id="pomodoroTime">25:00</div>
+        <div class="pomodoro-label" id="pomodoroLabel">专注时间</div>
+        <div class="pomodoro-controls">
+          <button class="btn" onclick="resetPomodoro()">重置</button>
+          <button class="btn btn-primary" id="pomodoroBtn" onclick="togglePomodoro()">开始专注</button>
+        </div>
+        <div class="pomodoro-stats">
+          <div class="stat-card"><div class="stat-label">今日完成</div><div class="stat-value" id="pomodoroCount">0</div><div class="stat-change">个番茄</div></div>
+          <div class="stat-card"><div class="stat-label">今日专注</div><div class="stat-value" id="pomodoroMinutes">0<span style="font-size:0.8rem;font-family:'Noto Sans SC';color:var(--text-muted)">min</span></div><div class="stat-change">累计</div></div>
+          <div class="stat-card"><div class="stat-label">本周完成</div><div class="stat-value" id="pomodoroWeek">0</div><div class="stat-change">个番茄</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Quick Add Modal -->
+<div class="modal-overlay" id="quickAddModal">
+  <div class="modal">
+    <h3>快速添加<span style="color:var(--accent-gold)">.</span></h3>
+    <div class="modal-field"><label>类型</label><select id="quickAddType"><option value="todo">待办任务</option><option value="note">知识笔记</option><option value="nav">快捷链接</option></select></div>
+    <div class="modal-field"><label>内容</label><input type="text" id="quickAddContent" placeholder="请输入内容..." onkeydown="if(event.key==='Enter')submitQuickAdd()"></div>
+    <div class="modal-field" id="quickAddTagField"><label>标签</label><select id="quickAddTag"><option value="brand">品牌策略</option><option value="promo">大促节点</option><option value="kol">KOL/KOC</option><option value="content">内容产出</option></select></div>
+    <div class="modal-field" id="quickAddUrlField" style="display:none"><label>链接地址</label><input type="text" id="quickAddUrl" placeholder="https://..."></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('quickAddModal')">取消</button><button class="btn btn-primary" onclick="submitQuickAdd()">添加</button></div>
+  </div>
+</div>
+
+<!-- Add Nav Modal -->
+<div class="modal-overlay" id="addNavModal">
+  <div class="modal">
+    <h3>添加快捷链接<span style="color:var(--accent-gold)">.</span></h3>
+    <div class="modal-field"><label>名称</label><input type="text" id="navName" placeholder="链接名称"></div>
+    <div class="modal-field"><label>描述</label><input type="text" id="navDesc" placeholder="简短描述"></div>
+    <div class="modal-field"><label>链接地址</label><input type="text" id="navUrl" placeholder="https://..."></div>
+    <div class="modal-field"><label>图标 (emoji)</label><input type="text" id="navIcon" placeholder="📌" maxlength="2" style="width:60px;text-align:center;font-size:1.2rem"></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('addNavModal')">取消</button><button class="btn btn-primary" onclick="addNavItem()">添加</button></div>
+  </div>
+</div>
+
+<script>
+// ===== DATA STORE =====
+const STORAGE_KEY = 'brand_workspace_v2';
+
+const defaultData = {
+  todos: [],
+  notes: [],
+  navItems: [
+    { id: 1, name: '飞书文档', desc: '在线协作文档', url: 'https://feishu.cn', icon: '📄', color: '#4285f4' },
+    { id: 2, name: '飞书多维表格', desc: '项目数据管理', url: 'https://feishu.cn/bitable', icon: '📊', color: '#34a853' },
+    { id: 3, name: '小红书', desc: '内容营销平台', url: 'https://xiaohongshu.com', icon: '📕', color: '#ff2442' },
+    { id: 4, name: '抖音', desc: '短视频内容分发', url: 'https://douyin.com', icon: '🎵', color: '#111' },
+    { id: 5, name: '微博', desc: '社交话题运营', url: 'https://weibo.com', icon: '📱', color: '#e6162d' },
+    { id: 6, name: 'Canva', desc: '快速设计工具', url: 'https://canva.com', icon: '🎨', color: '#00c4cc' },
+    { id: 7, name: 'PPT模板', desc: '品牌方案演示', url: 'https://slidesgo.com', icon: '📑', color: '#f5a623' },
+    { id: 8, name: '千瓜数据', desc: 'KOL数据分析', url: 'https://qian-gua.com', icon: '📈', color: '#7b68ee' },
+  ],
+  pomodoro: { todayCount: 0, todayMinutes: 0, weekCount: 0, lastDate: '' }
+};
+
+function loadData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) { const parsed = JSON.parse(saved); return { ...defaultData, ...parsed }; }
+  } catch(e) {}
+  return { ...defaultData };
+}
+
+function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+let appData = loadData();
+
+// ===== PANEL SWITCHING =====
+function switchPanel(panelId, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + panelId).classList.add('active');
+  if (el) {
+    el.classList.add('active');
+    const desktopNav = document.querySelector('.nav-item[data-panel="' + panelId + '"]');
+    if (desktopNav && el.classList.contains('mobile-nav-item')) desktopNav.classList.add('active');
+    if (el.classList.contains('nav-item')) {
+      const mobileNav = document.querySelector('.mobile-nav-item[data-panel="' + panelId + '"]');
+      if (mobileNav) mobileNav.classList.add('active');
+    }
+  }
+  window.scrollTo(0, 0);
+}
+
+// ===== TOAST =====
+function showToast(msg, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ===== MODAL =====
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function openQuickAdd() { openModal('quickAddModal'); document.getElementById('quickAddContent').focus(); }
+function openAddNavModal() { openModal('addNavModal'); document.getElementById('navName').focus(); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+});
+
+// ===== DATE/TIME =====
+function updateDateTime() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+  const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  const el = document.getElementById('sidebarDateTime');
+  if (el) el.textContent = dateStr + ' ' + timeStr;
+  const hour = now.getHours();
+  let greeting = hour < 6 ? '夜深了，注意休息' : hour < 12 ? '早安，开启高效的一天' : hour < 14 ? '午安，休息一下' : hour < 18 ? '下午好，保持专注' : '晚上好，回顾今天的成果';
+  const grEl = document.getElementById('sidebarGreeting');
+  if (grEl) grEl.textContent = greeting;
+}
+setInterval(updateDateTime, 1000);
+updateDateTime();
+
+// ===== TODO MANAGEMENT =====
+const tagMap = { brand: '品牌策略', promo: '大促节点', kol: 'KOL/KOC', content: '内容产出' };
+const tagClassMap = { brand: 'tag-brand', promo: 'tag-promo', kol: 'tag-kol', content: 'tag-content' };
+let currentFilter = 'all';
+
+function addTodo() {
+  const input = document.getElementById('todoInput');
+  const text = input.value.trim();
+  if (!text) return;
+  appData.todos.unshift({ id: Date.now(), text, done: false, tag: 'brand', createdAt: new Date().toISOString() });
+  saveData(appData);
+  input.value = '';
+  renderTodos();
+  updateDashboard();
+  showToast('任务已添加');
+}
+
+function toggleTodo(id) {
+  const todo = appData.todos.find(t => t.id === id);
+  if (todo) { todo.done = !todo.done; saveData(appData); renderTodos(); updateDashboard(); }
+}
+
+function deleteTodo(id) {
+  appData.todos = appData.todos.filter(t => t.id !== id);
+  saveData(appData); renderTodos(); updateDashboard(); showToast('任务已删除');
+}
+
+function filterTodos(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.todo-filter').forEach(f => f.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderTodos();
+}
+
+function clearCompletedTodos() {
+  appData.todos = appData.todos.filter(t => !t.done);
+  saveData(appData); renderTodos(); updateDashboard(); showToast('已清除完成的任务');
+}
+
+function renderTodos() {
+  const list = document.getElementById('todoList');
+  const empty = document.getElementById('todoEmpty');
+  if (!list) return;
+  let filtered = appData.todos;
+  if (currentFilter === 'active') filtered = filtered.filter(t => !t.done);
+  else if (currentFilter === 'done') filtered = filtered.filter(t => t.done);
+  else if (tagClassMap[currentFilter]) filtered = filtered.filter(t => t.tag === currentFilter);
+  if (filtered.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = filtered.map(t => {
+    const date = new Date(t.createdAt);
+    const dateStr = (date.getMonth()+1).toString().padStart(2,'0') + '/' + date.getDate().toString().padStart(2,'0');
+    return `<li class="todo-item">
+      <div class="todo-checkbox ${t.done ? 'checked' : ''}" onclick="toggleTodo(${t.id})"></div>
+      <div class="todo-content">
+        <div class="todo-text ${t.done ? 'done' : ''}">${escapeHtml(t.text)}</div>
+        <div class="todo-meta"><span class="todo-tag ${tagClassMap[t.tag] || 'tag-brand'}">${tagMap[t.tag] || '品牌策略'}</span><span class="todo-date">${dateStr}</span></div>
+      </div>
+      <div class="todo-actions"><button class="todo-action-btn" onclick="deleteTodo(${t.id})">✕</button></div>
+    </li>`;
+  }).join('');
+  const active = appData.todos.filter(t => !t.done).length;
+  const badge = document.getElementById('todoBadge');
+  if (badge) badge.textContent = active;
+  const mBadge = document.getElementById('mobileTodoBadge');
+  if (mBadge) { mBadge.textContent = active; mBadge.style.display = active > 0 ? 'block' : 'none'; }
+}
+
+// ===== NOTES =====
+const noteCategoryMap = { insight: '品牌洞察', idea: '策划灵感', resource: '合作资源', case: '案例研究', trend: '趋势观察', other: '其他' };
+const noteColorMap = { insight: '#FF7B7B', idea: '#D488A0', resource: '#6BB5A0', case: '#FF8C69', trend: '#E8869A', other: '#B09A9A' };
+
+function addNote() {
+  const content = document.getElementById('noteContent').value.trim();
+  if (!content) return;
+  appData.notes.unshift({ id: Date.now(), content, category: document.getElementById('noteCategory').value, createdAt: new Date().toISOString() });
+  saveData(appData);
+  document.getElementById('noteContent').value = '';
+  renderNotes(); updateDashboard();
+  showToast('笔记已保存');
+}
+
+function deleteNote(id) {
+  appData.notes = appData.notes.filter(n => n.id !== id);
+  saveData(appData); renderNotes(); updateDashboard(); showToast('笔记已删除');
+}
+
+function renderNotes() {
+  const grid = document.getElementById('notesGrid');
+  const empty = document.getElementById('notesEmpty');
+  if (!grid) return;
+  if (appData.notes.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = appData.notes.map(n => {
+    const date = new Date(n.createdAt);
+    const dateStr = date.getFullYear() + '.' + (date.getMonth()+1).toString().padStart(2,'0') + '.' + date.getDate().toString().padStart(2,'0') + ' ' + date.getHours().toString().padStart(2,'0') + ':' + date.getMinutes().toString().padStart(2,'0');
+    const cat = noteCategoryMap[n.category] || '其他';
+    const color = noteColorMap[n.category] || '#B09A9A';
+    return `<div class="note-card">
+      <div class="note-card-header"><span class="note-card-tag" style="background:${color}22;color:${color}">${cat}</span></div>
+      <div class="note-card-body">${escapeHtml(n.content)}</div>
+      <div class="note-card-footer"><span class="note-card-date">${dateStr}</span><button class="note-card-delete" onclick="deleteNote(${n.id})">删除</button></div>
+    </div>`;
+  }).join('');
+}
+
+// ===== NAVIGATION =====
+function renderNav() {
+  const grid = document.getElementById('navGrid');
+  if (!grid) return;
+  grid.innerHTML = appData.navItems.map(n => {
+    const color = n.color || '#FF7B7B';
+    return `<a class="nav-item-card" href="${escapeHtml(n.url)}" target="_blank" rel="noopener">
+      <div class="nav-item-icon" style="background:${color}18;color:${color}">${n.icon || '📌'}</div>
+      <div class="nav-item-info"><h4>${escapeHtml(n.name)}</h4><p>${escapeHtml(n.desc || '')}</p></div>
+    </a>`;
+  }).join('');
+}
+
+function addNavItem() {
+  const name = document.getElementById('navName').value.trim();
+  const url = document.getElementById('navUrl').value.trim();
+  if (!name || !url) { showToast('请填写名称和链接', 'error'); return; }
+  appData.navItems.push({
+    id: Date.now(), name, desc: document.getElementById('navDesc').value.trim(), url,
+    icon: document.getElementById('navIcon').value.trim() || '📌',
+    color: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')
+  });
+  saveData(appData); closeModal('addNavModal');
+  ['navName','navDesc','navUrl','navIcon'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  renderNav(); showToast('链接已添加');
+}
+
+// ===== QUICK ADD =====
+document.getElementById('quickAddType').addEventListener('change', function() {
+  const tagField = document.getElementById('quickAddTagField');
+  const urlField = document.getElementById('quickAddUrlField');
+  if (this.value === 'todo') { tagField.style.display = 'block'; urlField.style.display = 'none'; }
+  else if (this.value === 'note') { tagField.style.display = 'none'; urlField.style.display = 'none'; }
+  else { tagField.style.display = 'none'; urlField.style.display = 'block'; }
+});
+
+function submitQuickAdd() {
+  const type = document.getElementById('quickAddType').value;
+  const content = document.getElementById('quickAddContent').value.trim();
+  if (!content) { showToast('请输入内容', 'error'); return; }
+  if (type === 'todo') {
+    const tag = document.getElementById('quickAddTag').value;
+    appData.todos.unshift({ id: Date.now(), text: content, done: false, tag, createdAt: new Date().toISOString() });
+    renderTodos();
+  } else if (type === 'note') {
+    appData.notes.unshift({ id: Date.now(), content, category: 'idea', createdAt: new Date().toISOString() });
+    renderNotes();
+  } else {
+    const url = document.getElementById('quickAddUrl').value.trim();
+    if (!url) { showToast('请输入链接地址', 'error'); return; }
+    appData.navItems.push({ id: Date.now(), name: content, desc: '', url, icon: '📌', color: '#FF7B7B' });
+    renderNav();
+  }
+  saveData(appData); closeModal('quickAddModal');
+  document.getElementById('quickAddContent').value = '';
+  updateDashboard(); showToast('已添加');
+}
+
+// ===== AI ASSISTANT =====
+const aiPrompts = [
+  {
+    title: '制定品牌策略方案',
+    tag: '品牌策略',
+    desc: '为品牌制定完整的品牌定位、核心价值主张、目标用户画像与差异化策略方案。',
+    prompt: `请帮我制定一份品牌策略方案。
+
+【背景】
+请根据我的品牌当前阶段和市场环境，帮我梳理：
+1. 品牌核心价值主张与定位
+2. 目标用户画像与消费决策路径
+3. 差异化竞争策略
+4. 品牌传播策略框架
+
+【输出要求】
+- 输出格式为PPT大纲或结构化文档
+- 包含可执行的具体策略建议
+- 附竞品对标分析框架`
+  },
+  {
+    title: '撰写品牌/产品 Brief',
+    tag: '内容产出',
+    desc: '生成专业的品牌Brief或产品Brief，用于内部对齐或外部供应商沟通。',
+    prompt: `请帮我撰写一份品牌/产品Brief。
+
+【需求】
+请按照标准的Brief模板，包含以下内容：
+1. 品牌/产品背景概述
+2. 核心目标与KPI
+3. 目标受众画像
+4. 核心信息与卖点提炼
+5. 传播渠道与节奏建议
+6. 预算分配建议
+7. 竞品参考
+
+【输出要求】
+- 专业、简洁、可直接用于团队沟通
+- 适合飞书文档/PPT呈现的格式`
+  },
+  {
+    title: '规划大促节点营销方案',
+    tag: '大促节点',
+    desc: '针对即将到来的营销节点，规划全链路营销活动方案与执行时间表。',
+    prompt: `请帮我规划大促节点营销方案。
+
+【背景】
+针对即将到来的营销节点，请帮我：
+1. 分析该节点的用户消费心理与行为特征
+2. 制定预热-爆发-返场三阶段节奏
+3. 各渠道（小红书、抖音、微博、直播）的内容策略
+4. KOL/KOC矩阵排期建议
+5. 关键指标与ROI预估
+
+【输出要求】
+- 包含具体时间线（T-30到T+7）
+- 可执行的渠道分发计划
+- 风险预案与备选方案`
+  },
+  {
+    title: 'KOL/KOC 合作策略',
+    tag: 'KOL/KOC',
+    desc: '制定达人合作策略，包括选号标准、内容Brief、合作模式与效果评估。',
+    prompt: `请帮我制定KOL/KOC合作策略。
+
+【需求】
+请帮我梳理：
+1. 达人矩阵搭建策略（头部/腰部/KOC配比）
+2. 各平台达人筛选标准与评估维度
+3. 合作内容Brief模板
+4. 合作模式与报价参考
+5. 效果评估指标与复盘框架
+
+【输出要求】
+- 按平台（小红书、抖音、B站、微博）分别给出策略
+- 包含达人合作执行SOP
+- 可追踪的效果评估表结构`
+  },
+  {
+    title: '竞品分析与市场洞察',
+    tag: '品牌策略',
+    desc: '对竞品进行多维度分析，输出市场洞察报告与策略建议。',
+    prompt: `请帮我做一份竞品分析报告。
+
+【分析维度】
+请从以下维度进行分析：
+1. 品牌定位与核心卖点对比
+2. 产品矩阵与价格带分析
+3. 营销策略与渠道布局
+4. KOL/KOC合作策略对比
+5. 社交媒体声量与口碑分析
+6. 用户评价与痛点挖掘
+
+【输出要求】
+- 结构化对比表格
+- 可视化数据呈现（如有数据）
+- 基于分析的战略建议
+- SWOT分析框架`
+  },
+  {
+    title: '生成营销内容日历',
+    tag: '内容产出',
+    desc: '为指定月份/季度生成多平台内容营销日历，包含主题、形式与发布节奏。',
+    prompt: `请帮我生成一份内容营销日历。
+
+【需求】
+请为下个月/季度制定内容日历，包含：
+1. 每周内容主题与核心信息
+2. 各平台（小红书、抖音、微博、B站）内容形式规划
+3. 关键节点内容爆发策略
+4. 日常种草内容排期
+5. 内容素材需求清单
+
+【输出要求】
+- 可打印/嵌入飞书日历的表格格式
+- 每周主题明确，有节奏感
+- 与营销节点对齐`
+  }
+];
+
+function renderAiPrompts() {
+  const container = document.getElementById('aiPrompts');
+  if (!container) return;
+  container.innerHTML = aiPrompts.map((p, i) => `
+    <div class="ai-prompt-card" onclick="copyAiPrompt(${i}, this)">
+      <div class="ai-prompt-header">
+        <span class="ai-prompt-title">${p.title}</span>
+        <span class="ai-prompt-tag">${p.tag}</span>
+      </div>
+      <div class="ai-prompt-desc">${p.desc}</div>
+      <div class="ai-prompt-actions">
+        <button class="btn-copy" id="copyBtn${i}" onclick="event.stopPropagation(); copyAiPrompt(${i}, this.closest('.ai-prompt-card'))">📋 复制 Prompt</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function copyAiPrompt(index, cardEl) {
+  const prompt = aiPrompts[index].prompt;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(prompt).then(() => {
+      const btn = cardEl.querySelector('.btn-copy');
+      if (btn) { btn.textContent = '✓ 已复制'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = '📋 复制 Prompt'; btn.classList.remove('copied'); }, 2000); }
+      showToast('Prompt 已复制，粘贴到 TRAE 对话框即可使用');
+    }).catch(() => { fallbackCopy(prompt, cardEl); });
+  } else { fallbackCopy(prompt, cardEl); }
+}
+
+function fallbackCopy(text, cardEl) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); showToast('Prompt 已复制，粘贴到 TRAE 对话框即可使用'); } catch(e) { showToast('复制失败，请手动选择文本', 'error'); }
+  document.body.removeChild(ta);
+}
+
+function updateAiContext() {
+  const activeTodos = appData.todos.filter(t => !t.done).length;
+  const elTodos = document.getElementById('aiTodos');
+  const elNotes = document.getElementById('aiNotes');
+  if (elTodos) elTodos.textContent = activeTodos;
+  if (elNotes) elNotes.textContent = appData.notes.length;
+}
+
+// ===== STRATEGY =====
+function renderStrategy() {
+  const strategies = [
+    { icon: '◎', title: '品牌定位升级', desc: '重新梳理品牌核心价值主张，明确目标用户画像与品牌差异化定位，输出品牌定位手册。', progress: 65, color: '#FF7B7B', deadline: '2026.08.15', status: '推进中' },
+    { icon: '◈', title: 'Q3内容营销规划', desc: '制定第三季度内容营销日历，覆盖小红书、抖音、微博等平台，明确各平台内容策略与KPI。', progress: 40, color: '#D488A0', deadline: '2026.07.30', status: '规划中' },
+    { icon: '◉', title: '新品上市传播方案', desc: '新产品上市全链路传播方案，从预热到引爆到长尾维护，整合KOL、PR、社交媒体全渠道。', progress: 20, color: '#FF8C69', deadline: '2026.09.01', status: '筹备中' },
+    { icon: '✦', title: '竞品分析报告', desc: '对核心竞品进行品牌策略、产品矩阵、价格体系、营销投入等维度的全面对比分析。', progress: 80, color: '#6BB5A0', deadline: '2026.07.20', status: '收尾中' },
+    { icon: '▣', title: '用户洞察研究', desc: '通过定量问卷与定性访谈，深入了解目标用户需求痛点、消费决策路径与品牌认知。', progress: 55, color: '#E8869A', deadline: '2026.08.10', status: '推进中' },
+    { icon: '✎', title: '品牌视觉体系更新', desc: '与设计团队协作，更新品牌VI系统，包括Logo规范、色彩体系、字体规范与应用场景。', progress: 30, color: '#FF9E7B', deadline: '2026.09.15', status: '进行中' },
+  ];
+  const grid = document.getElementById('strategyGrid');
+  if (!grid) return;
+  grid.innerHTML = strategies.map(s => `
+    <div class="strategy-card">
+      <div class="strategy-card-icon" style="background:${s.color}18;color:${s.color}">${s.icon}</div>
+      <h3>${s.title}</h3><p>${s.desc}</p>
+      <div class="status-bar">
+        <div class="status-item"><span class="label">截止日期</span><span class="value">${s.deadline}</span></div>
+        <div class="status-item"><span class="label">状态</span><span class="value" style="color:${s.color}">${s.status}</span></div>
+        <div class="status-item"><span class="label">进度</span><span class="value">${s.progress}%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${s.progress}%;background:${s.color}"></div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== PROMO =====
+function renderPromoTimeline() {
+  const events = [
+    { date: '2026.07.18', title: '七夕情人节', desc: '浪漫主题营销活动，配合限定礼盒上线与社交媒体话题营销。', tags: ['情感营销', '限定产品'], active: true },
+    { date: '2026.08.01', title: '暑期大促', desc: '暑期清仓与爆款推荐，配合达人种草与直播间促销。', tags: ['促销', '达人合作'] },
+    { date: '2026.08.18', title: '818购物节', desc: '全渠道促销活动，重点布局抖音直播与小红书种草。', tags: ['大促', '直播'] },
+    { date: '2026.09.01', title: '开学季营销', desc: '针对学生群体与年轻消费者的开学主题内容与产品推荐。', tags: ['年轻化', '内容营销'] },
+    { date: '2026.09.17', title: '中秋国庆预热', desc: '双节整合营销方案，品牌情感沟通与礼品场景渗透。', tags: ['节日营销', '品牌传播'] },
+    { date: '2026.10.01', title: '国庆黄金周', desc: '国庆营销活动，重点户外场景与旅行关联内容营销。', tags: ['节日', '场景营销'] },
+    { date: '2026.10.24', title: '双11预热启动', desc: '双11营销战役预热期，种草蓄水、达人排期、素材准备。', tags: ['大促', '蓄水期'] },
+    { date: '2026.11.01', title: '双11爆发期', desc: '双11正式爆发，全渠道联动，直播矩阵、达人带货、品牌自播齐发力。', tags: ['大促', '全渠道'] },
+    { date: '2026.12.12', title: '双12收官', desc: '年度最后一个大促节点，长尾转化与年度会员活动。', tags: ['大促', '会员'] },
+  ];
+  const timeline = document.getElementById('promoTimeline');
+  if (!timeline) return;
+  timeline.innerHTML = events.map(e => `
+    <div class="timeline-item ${e.active ? 'active' : ''}">
+      <div class="timeline-date">${e.date}</div>
+      <div class="timeline-title">${e.title}</div>
+      <div class="timeline-desc">${e.desc}</div>
+      <div class="timeline-tags">${e.tags.map(t => `<span class="todo-tag tag-brand">${t}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+// ===== KOL =====
+function renderKolList() {
+  const kols = [
+    { name: '头部达人 A', platform: '抖音', type: 'KOL', status: '合作中', followers: '500W+', deliverables: '已交付 3/5 条', color: '#FF8C69' },
+    { name: '腰部达人 B', platform: '小红书', type: 'KOL', status: '沟通中', followers: '80W', deliverables: '待确认排期', color: '#FF7B7B' },
+    { name: 'KOC 矩阵 C', platform: '小红书', type: 'KOC', status: '招募中', followers: '1W-5W', deliverables: '目标 20 人', color: '#D488A0' },
+    { name: '艺人节点 D', platform: '微博/抖音', type: '艺人', status: '方案评审中', followers: '2000W+', deliverables: '品牌代言合作', color: '#E8869A' },
+    { name: '垂类达人 E', platform: 'B站', type: 'KOL', status: '已签约', followers: '150W', deliverables: '深度测评 x2', color: '#6BB5A0' },
+  ];
+  const list = document.getElementById('kolList');
+  if (!list) return;
+  list.innerHTML = kols.map(k => `
+    <div style="display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
+      <div style="width:40px;height:40px;border-radius:10px;background:${k.color}18;color:${k.color};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">${k.type === 'KOC' ? '◈' : k.type === '艺人' ? '★' : '◎'}</div>
+      <div style="flex:1;min-width:140px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:0.88rem;font-weight:500">${k.name}</span>
+          <span class="todo-tag" style="background:${k.color}22;color:${k.color}">${k.platform}</span>
+          <span class="todo-tag tag-brand">${k.type}</span>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px">${k.followers} 粉丝 · ${k.deliverables}</div>
+      </div>
+      <div style="text-align:right"><div style="font-size:0.78rem;color:${k.color};font-weight:500">${k.status}</div></div>
+    </div>
+  `).join('');
+}
+
+// ===== POMODORO =====
+let pomodoroInterval = null;
+let pomodoroTime = 25 * 60;
+let pomodoroRunning = false;
+let pomodoroMode = 'focus';
+
+function updatePomodoroDisplay() {
+  const min = Math.floor(pomodoroTime / 60).toString().padStart(2, '0');
+  const sec = (pomodoroTime % 60).toString().padStart(2, '0');
+  const el = document.getElementById('pomodoroTime');
+  if (el) el.textContent = min + ':' + sec;
+}
+
+function togglePomodoro() {
+  const btn = document.getElementById('pomodoroBtn');
+  if (pomodoroRunning) {
+    clearInterval(pomodoroInterval);
+    pomodoroRunning = false;
+    if (btn) btn.textContent = '继续';
+  } else {
+    pomodoroRunning = true;
+    if (btn) btn.textContent = '暂停';
+    pomodoroInterval = setInterval(() => {
+      pomodoroTime--;
+      if (pomodoroTime <= 0) {
+        clearInterval(pomodoroInterval);
+        pomodoroRunning = false;
+        if (pomodoroMode === 'focus') {
+          appData.pomodoro.todayCount++;
+          appData.pomodoro.todayMinutes += 25;
+          appData.pomodoro.weekCount++;
+          saveData(appData);
+          showToast('专注完成！休息5分钟吧');
+          pomodoroMode = 'break';
+          pomodoroTime = 5 * 60;
+          const label = document.getElementById('pomodoroLabel');
+          if (label) label.textContent = '休息时间';
+          if (btn) btn.textContent = '开始休息';
+        } else {
+          showToast('休息结束，继续专注！');
+          pomodoroMode = 'focus';
+          pomodoroTime = 25 * 60;
+          const label = document.getElementById('pomodoroLabel');
+          if (label) label.textContent = '专注时间';
+          if (btn) btn.textContent = '开始专注';
+        }
+        updatePomodoroStats();
+        updateDashboard();
+      }
+      updatePomodoroDisplay();
+    }, 1000);
+  }
+}
+
+function resetPomodoro() {
+  clearInterval(pomodoroInterval);
+  pomodoroRunning = false;
+  pomodoroMode = 'focus';
+  pomodoroTime = 25 * 60;
+  const label = document.getElementById('pomodoroLabel');
+  if (label) label.textContent = '专注时间';
+  const btn = document.getElementById('pomodoroBtn');
+  if (btn) btn.textContent = '开始专注';
+  updatePomodoroDisplay();
+}
+
+function updatePomodoroStats() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (appData.pomodoro.lastDate !== today) {
+    appData.pomodoro.todayCount = 0;
+    appData.pomodoro.todayMinutes = 0;
+    appData.pomodoro.lastDate = today;
+    saveData(appData);
+  }
+  const elCount = document.getElementById('pomodoroCount');
+  if (elCount) elCount.textContent = appData.pomodoro.todayCount;
+  const elMin = document.getElementById('pomodoroMinutes');
+  if (elMin) elMin.innerHTML = appData.pomodoro.todayMinutes + '<span style="font-size:0.8rem;font-family:\'Noto Sans SC\';color:var(--text-muted)">min</span>';
+  const elWeek = document.getElementById('pomodoroWeek');
+  if (elWeek) elWeek.textContent = appData.pomodoro.weekCount;
+}
+
+// ===== DASHBOARD =====
+function updateDashboard() {
+  const activeTodos = appData.todos.filter(t => !t.done).length;
+  const elTodos = document.getElementById('stat-todos');
+  if (elTodos) elTodos.textContent = activeTodos;
+  const elNotes = document.getElementById('stat-notes');
+  if (elNotes) elNotes.textContent = appData.notes.length;
+  const elFocus = document.getElementById('stat-focus');
+  if (elFocus) elFocus.innerHTML = appData.pomodoro.todayMinutes + '<span style="font-size:1rem;font-family:\'Noto Sans SC\';color:var(--text-muted)">min</span>';
+  const badge = document.getElementById('todoBadge');
+  if (badge) badge.textContent = activeTodos;
+  const mBadge = document.getElementById('mobileTodoBadge');
+  if (mBadge) { mBadge.textContent = activeTodos; mBadge.style.display = activeTodos > 0 ? 'block' : 'none'; }
+
+  const dashList = document.getElementById('dashTodoList');
+  const dashEmpty = document.getElementById('dashTodoEmpty');
+  const recentTodos = appData.todos.filter(t => !t.done).slice(0, 5);
+  if (dashList && dashEmpty) {
+    if (recentTodos.length === 0) { dashList.innerHTML = ''; dashEmpty.style.display = 'block'; }
+    else {
+      dashEmpty.style.display = 'none';
+      dashList.innerHTML = recentTodos.map(t => {
+        const date = new Date(t.createdAt);
+        const dateStr = (date.getMonth()+1).toString().padStart(2,'0') + '/' + date.getDate().toString().padStart(2,'0');
+        return `<li class="todo-item">
+          <div class="todo-checkbox ${t.done ? 'checked' : ''}" onclick="toggleTodo(${t.id})"></div>
+          <div class="todo-content"><div class="todo-text ${t.done ? 'done' : ''}">${escapeHtml(t.text)}</div>
+          <div class="todo-meta"><span class="todo-tag ${tagClassMap[t.tag] || 'tag-brand'}">${tagMap[t.tag] || '品牌策略'}</span><span class="todo-date">${dateStr}</span></div></div>
+        </li>`;
+      }).join('');
+    }
+  }
+
+  const dashNotes = document.getElementById('dashNotesPreview');
+  const dashNoteEmpty = document.getElementById('dashNoteEmpty');
+  const recentNotes = appData.notes.slice(0, 4);
+  if (dashNotes && dashNoteEmpty) {
+    if (recentNotes.length === 0) { dashNotes.innerHTML = ''; dashNoteEmpty.style.display = 'block'; }
+    else {
+      dashNoteEmpty.style.display = 'none';
+      dashNotes.innerHTML = recentNotes.map(n => {
+        const cat = noteCategoryMap[n.category] || '其他';
+        const color = noteColorMap[n.category] || '#B09A9A';
+        const preview = n.content.length > 80 ? n.content.slice(0, 80) + '...' : n.content;
+        return `<div style="padding:12px 0;border-bottom:1px solid rgba(255,212,199,0.12)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span class="todo-tag" style="background:${color}22;color:${color}">${cat}</span></div>
+          <div style="font-size:0.82rem;line-height:1.6;color:var(--text-secondary)">${escapeHtml(preview)}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+  updateAiContext();
+}
+
+// ===== EXPORT =====
+function exportData() {
+  const json = JSON.stringify(appData, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'workspace-data-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('数据已导出');
+}
+
+// ===== UTILS =====
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ===== SERVICE WORKER for PWA =====
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    const swUrl = URL.createObjectURL(new Blob([`
+      const CACHE = 'brand-workspace-v1';
+      self.addEventListener('install', e => { self.skipWaiting(); });
+      self.addEventListener('activate', e => { e.waitUntil(clients.claim()); });
+      self.addEventListener('fetch', e => {
+        e.respondWith(
+          fetch(e.request).then(r => { const clone = r.clone(); caches.open(CACHE).then(c => c.put(e.request, clone)); return r; })
+          .catch(() => caches.match(e.request))
+        );
+      });
+    `], { type: 'application/javascript' }));
+    navigator.serviceWorker.register(swUrl).catch(() => {});
+  });
+}
+
+// ===== CASE WORKSHOP =====
+let currentWorkshopResult = '';
+
+function switchWorkshopTab(tab, el) {
+  document.querySelectorAll('.workshop-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const textarea = document.getElementById('workshopContent');
+  if (tab === 'text') textarea.placeholder = '粘贴你收藏的笔记内容、文案、视频描述...';
+  else if (tab === 'video') textarea.placeholder = '粘贴视频链接（抖音、B站、小红书等），或描述视频内容...';
+  else textarea.placeholder = '粘贴文章链接，或复制文章内容到这里...';
+}
+
+function analyzeCase() {
+  const title = document.getElementById('workshopTitle').value.trim();
+  const brand = document.getElementById('workshopBrand').value.trim();
+  const content = document.getElementById('workshopContent').value.trim();
+  const dims = Array.from(document.querySelectorAll('.workshop-dim input:checked')).map(cb => cb.value);
+
+  if (!title) { showToast('请输入案例标题', 'error'); return; }
+  if (!content) { showToast('请输入案例内容或链接', 'error'); return; }
+
+  const dimTemplates = {
+    positioning: `<div class="workshop-result-section"><div class="workshop-result-title">📍 品牌定位分析</div><div class="workshop-result-body"><ul><li>该案例的品牌核心价值主张是什么？</li><li>目标受众画像与消费决策路径</li><li>品牌差异化策略的切入点</li><li>与竞品的定位区隔</li></ul></div></div>`,
+    creative: `<div class="workshop-result-section"><div class="workshop-result-title">💡 创意策略拆解</div><div class="workshop-result-body"><ul><li>核心创意概念与传播主张</li><li>创意表达的视觉/文案风格</li><li>话题制造与社交货币设计</li><li>创意与品牌调性的契合度</li></ul></div></div>`,
+    content: `<div class="workshop-result-section"><div class="workshop-result-title">📝 内容拆解</div><div class="workshop-result-body"><ul><li>内容形式与信息架构</li><li>开头/钩子设计如何吸引注意力</li><li>叙事节奏与情绪曲线</li><li>CTA（行动号召）设计</li></ul></div></div>`,
+    channel: `<div class="workshop-result-section"><div class="workshop-result-title">📢 渠道打法</div><div class="workshop-result-body"><ul><li>主要分发渠道与组合策略</li><li>各渠道内容适配差异</li><li>渠道节奏与发布时间规划</li><li>流量获取与放大机制</li></ul></div></div>`,
+    kol: `<div class="workshop-result-section"><div class="workshop-result-title">✦ 达人合作策略</div><div class="workshop-result-body"><ul><li>达人矩阵选择逻辑（头部/腰部/KOC）</li><li>达人内容方向与品牌契合度</li><li>合作形式（种草/测评/直播等）</li><li>达人内容的二次传播利用</li></ul></div></div>`,
+    conversion: `<div class="workshop-result-section"><div class="workshop-result-title">🎯 转化路径</div><div class="workshop-result-body"><ul><li>用户触达 → 兴趣激发 → 行动转化 链路</li><li>转化触点设计（链接、二维码、直播间等）</li><li>优惠/激励机制如何促进转化</li><li>私域沉淀与复购引导</li></ul></div></div>`,
+    data: `<div class="workshop-result-section"><div class="workshop-result-title">📊 数据亮点</div><div class="workshop-result-body"><ul><li>曝光量、互动量等核心数据表现</li><li>ROI 或转化效率预估</li><li>用户增长与粉丝沉淀效果</li><li>与行业 benchmark 的对比</li></ul></div></div>`,
+    insight: `<div class="workshop-result-section"><div class="workshop-result-title">🔍 核心洞察</div><div class="workshop-result-body"><ul><li>该案例成功的关键驱动因素</li><li>踩中了什么用户心理/社会情绪</li><li>可复用的方法论与框架</li><li>对我们品牌的启发与应用建议</li></ul></div></div>`
+  };
+
+  let resultHtml = `<div style="margin-bottom:16px;padding:12px 16px;background:var(--bg-secondary);border-radius:var(--radius-sm);border-left:3px solid var(--accent-gold)"><strong style="color:var(--text-primary)">${escapeHtml(title)}</strong>${brand ? ' · ' + escapeHtml(brand) : ''}<div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px">来源内容已收录，请基于下方框架进行深度分析</div></div>`;
+  dims.forEach(d => { if (dimTemplates[d]) resultHtml += dimTemplates[d]; });
+  resultHtml += `<div class="workshop-result-section"><div class="workshop-result-title">✨ 经验萃取</div><div class="workshop-result-body"><ul><li><strong>可直接复用的策略：</strong>________________________</li><li><strong>需要调整适配的点：</strong>________________________</li><li><strong>落地执行建议：</strong>________________________</li></ul></div></div>`;
+
+  currentWorkshopResult = resultHtml;
+  document.getElementById('workshopResult').innerHTML = resultHtml;
+  document.getElementById('workshopResultCard').style.display = 'block';
+  document.getElementById('workshopResultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showToast('分析框架已生成，请结合案例内容填写分析');
+}
+
+function saveWorkshopResult() {
+  const title = document.getElementById('workshopTitle').value.trim();
+  const brand = document.getElementById('workshopBrand').value.trim();
+  const content = document.getElementById('workshopContent').value.trim();
+  const category = document.getElementById('workshopCategory').value;
+  const dims = Array.from(document.querySelectorAll('.workshop-dim input:checked')).map(cb => cb.value);
+
+  const caseStudy = {
+    id: Date.now(),
+    title, brand, content,
+    dims,
+    result: currentWorkshopResult,
+    category,
+    createdAt: new Date().toISOString()
+  };
+
+  if (!appData.caseStudies) appData.caseStudies = [];
+  appData.caseStudies.unshift(caseStudy);
+  saveData(appData);
+
+  const noteContent = `【案例拆解】${title}${brand ? ' · ' + brand : ''}\n\n分析维度：${dims.map(d => ({positioning:'品牌定位',creative:'创意策略',content:'内容拆解',channel:'渠道打法',kol:'达人合作',conversion:'转化路径',data:'数据亮点',insight:'核心洞察'}[d])).join('、')}\n\n${content.slice(0, 500)}${content.length > 500 ? '...' : ''}`;
+  appData.notes.unshift({ id: Date.now(), content: noteContent, category, createdAt: new Date().toISOString() });
+  saveData(appData);
+
+  document.getElementById('workshopTitle').value = '';
+  document.getElementById('workshopBrand').value = '';
+  document.getElementById('workshopContent').value = '';
+  document.getElementById('workshopResultCard').style.display = 'none';
+  renderWorkshopHistory();
+  renderNotes();
+  updateDashboard();
+  showToast('已保存到案例库和知识笔记');
+}
+
+function renderWorkshopHistory() {
+  const container = document.getElementById('workshopHistory');
+  if (!container) return;
+  const studies = appData.caseStudies || [];
+  if (studies.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = `<div class="card-title" style="margin-bottom:16px"><span class="icon">◐</span> 已拆解案例 (${studies.length})</div>` + studies.map(s => {
+    const date = new Date(s.createdAt);
+    const dateStr = date.getFullYear() + '.' + (date.getMonth()+1).toString().padStart(2,'0') + '.' + date.getDate().toString().padStart(2,'0');
+    const dimLabels = s.dims.map(d => ({positioning:'品牌定位',creative:'创意策略',content:'内容拆解',channel:'渠道打法',kol:'达人合作',conversion:'转化路径',data:'数据亮点',insight:'核心洞察'}[d])).join(' · ');
+    return `<div class="workshop-history-card">
+      <div class="workshop-history-header">
+        <span class="workshop-history-title">${escapeHtml(s.title)}</span>
+        ${s.brand ? `<span class="workshop-history-brand">${escapeHtml(s.brand)}</span>` : ''}
+      </div>
+      <div class="workshop-history-preview">分析维度：${dimLabels}</div>
+      <div class="workshop-history-meta">
+        <span>${dateStr}</span>
+        <div class="workshop-history-actions">
+          <button onclick="viewCaseStudy(${s.id})">查看详情</button>
+          <button onclick="deleteCaseStudy(${s.id})">删除</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function viewCaseStudy(id) {
+  const s = (appData.caseStudies || []).find(c => c.id === id);
+  if (!s) return;
+  currentWorkshopResult = s.result;
+  document.getElementById('workshopResult').innerHTML = s.result;
+  document.getElementById('workshopResultCard').style.display = 'block';
+  document.getElementById('workshopResultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function deleteCaseStudy(id) {
+  if (!appData.caseStudies) return;
+  appData.caseStudies = appData.caseStudies.filter(c => c.id !== id);
+  saveData(appData);
+  renderWorkshopHistory();
+  showToast('已删除');
+}
+
+// ===== INIT =====
+function init() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (appData.pomodoro.lastDate !== today) {
+    appData.pomodoro.todayCount = 0;
+    appData.pomodoro.todayMinutes = 0;
+    appData.pomodoro.lastDate = today;
+    saveData(appData);
+  }
+  renderTodos();
+  renderNotes();
+  renderNav();
+  renderStrategy();
+  renderPromoTimeline();
+  renderKolList();
+  renderAiPrompts();
+  renderWorkshopHistory();
+  updatePomodoroStats();
+  updateDashboard();
+  updatePomodoroDisplay();
+  updateAiContext();
+}
+
+init();
+</script>
+</body>
+</html>
